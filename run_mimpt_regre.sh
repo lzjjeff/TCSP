@@ -1,0 +1,23 @@
+export CUDA_VISIBLE_DEVICES=0
+python run_mimpt.py \
+--dataset mosei \
+--batch_size 24 \
+--do_regre \
+--trans_save_path ./save/trans/ \
+--regre_save_path ./save/regre/mi_topk_5_mp_topk_5/ \
+--regre_result_path ./result/regre/mi_topk_5_mp_topk_5/ \
+--device_ids 0 \
+--trans_epoch 40 \
+--trans_lr 1e-4 \
+--trans_hidden_size 40 \
+--trans_num_layers 1  \
+--trans_num_heads 5 \
+--regre_epoch 30 \
+--regre_lr 1e-3 \
+--regre_mask_theta 0.04 \
+--regre_mask_topk 5 \
+--regre_mi_mask_type topk \
+--regre_mp_mask_type topk \
+--regre_hidden_size 40 \
+--regre_num_layers 5 \
+--regre_num_heads 5
