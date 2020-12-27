@@ -1,11 +1,11 @@
 #
 # code by Zijie Lin @jeff97
-# Reference : https://github.com/graykode/nlp-tutorial/tree/master/4-2.Seq2Seq(Attention)
+# Reference : https://github.com/graykode/nlp-tutorial/tree/master/5-1.Transformer
 #
 import numpy as np
 import torch
 import torch.nn as nn
-from modules.transformer import SelfEncoder, MaskCrossEncoder, Decoder
+from modules.transformer import SelfEncoder, Decoder, MaskCrossEncoder, ConcatMaskCrossEncoder
 
 
 def get_attn_pad_mask(seq_q, seq_k):
@@ -65,6 +65,34 @@ class Translation(nn.Module):
 
         return dec_logits, all_dec_enc_attn_weights[0]
 
+    def predict(self, source, target):
+        # get decoder inputs
+        enc_inputs = self.enc_proj(source)
+        enc_self_attn_mask = get_attn_pad_mask(enc_inputs, enc_inputs)
+        enc_outputs, _ = self.encoder(enc_inputs, enc_self_attn_mask)
+
+        pred_target = torch.zeros_like(target)   # (b, n, t_d)
+        next_symbol = torch.zeros(pred_target.size(0), pred_target.size(2)).to(pred_target.device)  # (b, t_d)
+
+        for i in range(pred_target.size(1)):
+            # print(i)
+            pred_target[:,i,:] = next_symbol
+            dec_inputs = self.dec_proj(pred_target)  # (b, n, h_d)
+
+            dec_self_attn_pad_mask = get_attn_pad_mask(dec_inputs, dec_inputs)
+            dec_self_attn_subsequent_mask = get_attn_subsequent_mask(dec_inputs)
+            dec_self_attn_mask = torch.gt((dec_self_attn_pad_mask + dec_self_attn_subsequent_mask), 0)
+            dec_enc_attn_mask = get_attn_pad_mask(dec_inputs, enc_inputs)
+
+            dec_outputs, _, _ = self.decoder(dec_inputs, enc_outputs, dec_self_attn_mask, dec_enc_attn_mask)    # (b, n, h_d)
+            projected = self.projection(dec_outputs)    # (b, n, t_d)
+            next_symbol = projected[:,i,:].squeeze(1)   # (b, t_d)
+        
+        # print(pred_target.size())
+        
+        return self.forward(source, pred_target)
+    
+
 
 class MIMPT(nn.Module):
     def __init__(self, config):
@@ -84,8 +112,14 @@ class MIMPT(nn.Module):
                                                   ff_size=config["ff_size"],
                                                   n_heads=config["num_heads"],
                                                   n_layers=config["num_layers"])
+        # self.self_trm = SelfEncoder(hidden_size=config["hidden_size"]*2,
+        #                             head_size=config["head_size"]*2,
+        #                             ff_size=config["ff_size"]*2,
+        #                             n_heads=config["num_heads"],
+        #                             n_layers=config["num_layers"])
 
         self.fc = nn.Linear(config["hidden_size"]*2, 1)
+        # self.fc = nn.Linear(config["hidden_size"]*4, 1)     # for concat
 
     def forward(self, w, v, a, l, w2v_mi_mask=None, w2a_mi_mask=None, w2v_mp_mask=None, w2a_mp_mask=None):
         w_proj = self.w_proj(w)
@@ -102,7 +136,12 @@ class MIMPT(nn.Module):
         all_v_mi_cross_attn_weights, all_v_mp_cross_attn_weights, all_vw_self_attn_weights = vw_attn_weights_list
         all_a_mi_cross_attn_weights, all_a_mp_cross_attn_weights, all_aw_self_attn_weights = aw_attn_weights_list
 
-        concat = torch.cat([vw_enc_hs[:, -1], aw_enc_hs[:, -1]], dim=1)
+        concat = torch.cat([vw_enc_hs[:, -1], aw_enc_hs[:, -1]], dim=-1)
+        # concat = torch.cat([vw_enc_hs, aw_enc_hs], dim=-1)
+
+        # self_attn_mask = get_attn_pad_mask(w_proj, w_proj)
+        # self_enc_hs, all_self_attn_weights = self.self_trm(concat, self_attn_mask)
+        # out = self_enc_hs[:, -1]
         out = self.fc(concat)
 
         return out.view(-1), [all_v_mi_cross_attn_weights, all_v_mp_cross_attn_weights, all_vw_self_attn_weights,
@@ -135,5 +174,4 @@ def get_mp_out(hs, mp_mask, soft_attn):
     sel = hs.masked_select(mp_mask).view(hs.size(0), -1, hs.size(2))
     mp_out, _ = soft_attn(sel)
     return mp_out.unsqueeze(1)
-
 

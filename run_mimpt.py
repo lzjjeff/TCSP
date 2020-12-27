@@ -122,29 +122,32 @@ def train_translation(tr_loader, val_loader, model, optimizer, scheduler, loss_f
         torch.save(val_attn_weights, os.path.join(config["translation"]["save_path"], f'attn_weights/val_attn_weights_{predix}_{epoch}.std'))
 
 
-def get_mi_mask(trans_attn_weights, type='theta'):
-    trans_attn_weights = trans_attn_weights.mean(1)     # (b, n_h, v_n, l_n) -> (b, v_n, l_n)
+def get_mi_mask(trans_attn_weights, type='theta', mean=True):
+    if mean:
+        trans_attn_weights = trans_attn_weights.mean(1)     # (b, n_h, v_n, l_n) -> (b, v_n, l_n)
     if type == 'theta':
         mi_mask = trans_attn_weights < config["regression"]["mask_theta"]
-        mi_mask = mi_mask.permute(0, 2, 1).contiguous()  # (b, l_n, v_n)
+        mi_mask = mi_mask.transpose(-1, -2).contiguous()  # (b, l_n, v_n)
         return mi_mask
     elif type == 'topk':
-        _, indices = trans_attn_weights.sort(dim=2, descending=True)
+        _, indices = trans_attn_weights.sort(dim=-1, descending=True)
         mi_mask = torch.ones_like(trans_attn_weights)
         mi_mask[:, :, :config["regression"]["mask_topk"]] = 0
         _, indices = indices.sort(dim=-1)
-        mi_mask = mi_mask.gather(dim=2, index=indices)
-        mi_mask = mi_mask.permute(0, 2, 1).contiguous().to(torch.bool)  # (b, l_n, v_n)
+        mi_mask = mi_mask.gather(dim=-1, index=indices)
+        mi_mask = mi_mask.transpose(-1, -2).contiguous().to(torch.bool)  # (b, l_n, v_n)
         return mi_mask
     else:
         raise TypeError('Invalid mask shape!')
 
 
-def get_mp_mask(trans_pred, trans_true, trans_loss_func, type='topk'):
+def get_mp_mask(trans_pred, trans_true, trans_loss_func, type='topk', mean=True):
     trans_losses = trans_loss_func(trans_pred, trans_true).mean(-1)     # (b, v_n)
     if type == 'theta':
         mp_mask = trans_losses < config["regression"]["mask_theta"]
         mp_mask = mp_mask.unsqueeze(1).repeat(1, trans_pred.size(1), 1)  # (b, l_n, v_n)
+        if not mean:
+            mp_mask = mp_mask.unsqueeze(1).repeat(1, config["regression"]["num_heads"], 1, 1)   # (b, n_h, l_n, v_n)
         return mp_mask
     elif type == 'topk':
         _, indices = trans_losses.sort(dim=-1, descending=True)
@@ -153,6 +156,8 @@ def get_mp_mask(trans_pred, trans_true, trans_loss_func, type='topk'):
         _, indices = indices.sort(dim=-1)
         mp_mask = mp_mask.gather(dim=1, index=indices)
         mp_mask = mp_mask.unsqueeze(1).repeat(1, trans_pred.size(1), 1).to(torch.bool)   # (b, l_n, v_n)
+        if not mean:
+            mp_mask = mp_mask.unsqueeze(1).repeat(1, config["regression"]["num_heads"], 1, 1)  # (b, n_h, l_n, v_n)
         return mp_mask
     else:
         raise TypeError('Invalid mask shape!')
@@ -166,16 +171,16 @@ def batch_fit(batch, model, regre_loss_func, trans_model_w2v, trans_model_w2a, t
     batch_size = w.size(0)  # （batch_size, length, dim）
 
     # modality-invariant & modality-private
-    v_pred, w2v_attn_weights = trans_model_w2v(w, shift_inputs(v_norm))       # (b, v_n, d), (b, n_h, v_n, l_n)
-    a_pred, w2a_attn_weights = trans_model_w2a(w, shift_inputs(a_norm))
+    v_pred, w2v_attn_weights = trans_model_w2v.module.predict(w, shift_inputs(v_norm))       # (b, v_n, d), (b, n_h, v_n, l_n)
+    a_pred, w2a_attn_weights = trans_model_w2a.module.predict(w, shift_inputs(a_norm))
 
     # modality-invariant mask
-    w2v_mi_mask = get_mi_mask(w2v_attn_weights, type=config["regression"]["mi_mask_type"])     # (b, l_n, v_n)
-    w2a_mi_mask = get_mi_mask(w2a_attn_weights, type=config["regression"]["mi_mask_type"])     # (b, l_n, a_n)
+    w2v_mi_mask = get_mi_mask(w2v_attn_weights, type=config["regression"]["mi_mask_type"], mean=True)     # (b, l_n, v_n)
+    w2a_mi_mask = get_mi_mask(w2a_attn_weights, type=config["regression"]["mi_mask_type"], mean=True)     # (b, l_n, a_n)
 
     # modality-private mask
-    w2v_mp_mask = get_mp_mask(v_pred, v_norm, trans_loss_func, type=config["regression"]["mp_mask_type"])   # (b, l_n, v_n)
-    w2a_mp_mask = get_mp_mask(a_pred, a_norm, trans_loss_func, type=config["regression"]["mp_mask_type"])   # (b, l_n, v_n)
+    w2v_mp_mask = get_mp_mask(v_pred, v_norm, trans_loss_func, type=config["regression"]["mp_mask_type"], mean=True)   # (b, l_n, v_n)
+    w2a_mp_mask = get_mp_mask(a_pred, a_norm, trans_loss_func, type=config["regression"]["mp_mask_type"], mean=True)   # (b, l_n, v_n)
 
     # y_pred, _ = model(w, v, a, l)   # basemodel
     y_pred, _ = model(w, v, a, l, w2v_mi_mask, w2a_mi_mask, w2v_mp_mask, w2a_mp_mask)
@@ -204,8 +209,8 @@ def train_regression(train_loader, valid_loader, model, optimizer, scheduler, re
         train_loss = 0.0
         train_size = 0
 
-        scheduler.step(epoch)
-        print("EPOCH %s | Current learning rate: %s" % (epoch, optimizer.state_dict()['param_groups'][0]['lr']))
+        # scheduler.step(epoch)
+        # print("EPOCH %s | Current learning rate: %s" % (epoch, optimizer.state_dict()['param_groups'][0]['lr']))
         optimizer.zero_grad()
 
         for batch in tqdm(train_loader):
@@ -249,13 +254,13 @@ def train_regression(train_loader, valid_loader, model, optimizer, scheduler, re
             # print("Current learning rate: %s" % optimizer.state_dict()['param_groups'][0]['lr'])
 
         # 更新学习率并读取最佳模型
-        # scheduler.step(valid_loss)
-        # if optimizer.state_dict()['param_groups'][0]['lr'] < last_lr:
-        #     if device == "cpu":
-        #         model.load_state_dict(torch.load(f'{config["regression"]["save_path"]}model.std'))
-        #     else:
-        #         model.module.load_state_dict(torch.load(f'{config["regression"]["save_path"]}model.std'))
-        #     last_lr = optimizer.state_dict()['param_groups'][0]['lr']
+        scheduler.step(valid_loss)
+        if optimizer.state_dict()['param_groups'][0]['lr'] < last_lr:
+            if device == "cpu":
+                model.load_state_dict(torch.load(f'{config["regression"]["save_path"]}model.std'))
+            else:
+                model.module.load_state_dict(torch.load(f'{config["regression"]["save_path"]}model.std'))
+            last_lr = optimizer.state_dict()['param_groups'][0]['lr']
 
         lrs.append(optimizer.state_dict()['param_groups'][0]['lr'])
 
@@ -394,8 +399,8 @@ if __name__ == '__main__':
 
         regression_optimizer = optim.Adam([param for param in regression_model.parameters() if param.requires_grad],
                                lr=config["regression"]["lr"], weight_decay=config["regression"]["weight_decay"])
-        # scheduler = ReduceLROnPlateau(regression_optimizer, mode='min', patience=5, factor=0.1, verbose=True)
-        scheduler = WarmUpLRScheduler(regression_optimizer, warmup=0.1, total_epochs=config["regression"]["epoch"])
+        scheduler = ReduceLROnPlateau(regression_optimizer, mode='min', patience=5, factor=0.1, verbose=True)
+        # scheduler = WarmUpLRScheduler(regression_optimizer, warmup=0.1, total_epochs=config["regression"]["epoch"])
         regresson_loss_func = nn.L1Loss()
 
         trans_loss_func = nn.MSELoss(reduce=False)
