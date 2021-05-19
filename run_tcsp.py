@@ -76,7 +76,7 @@ def train_translation(tr_loader, val_loader, model, optimizer, scheduler, loss_f
         # val_attn_weights = torch.cat(val_attn_weights, dim=0)
         print("EPOCH %s | Validtation loss: %s\nEPOCH %s | Current learning rate: %s" %
               (epoch, round(val_loss, 4), epoch, optimizer.state_dict()['param_groups'][0]['lr']))
-        with open(f'{config["translation"]["result_path"]}translation_result_{predix}.txt', 'a', encoding='utf-8') as fo:
+        with open(f'{config["translation"]["save_path"]}translation_result_{predix}.txt', 'a', encoding='utf-8') as fo:
             fo.write("\nEPOCH %s | Train loss: %s\nEPOCH %s | Validtation loss: %s\nEPOCH %s | Current learning rate: %s" %
                      (epoch, round(tr_loss, 4), epoch, round(val_loss, 4), epoch, optimizer.state_dict()['param_groups'][0]['lr']))
 
@@ -231,7 +231,7 @@ def train_regression(train_loader, valid_loader, model, optimizer, scheduler, re
         print("EPOCH %s | Validtation loss: %s" % (epoch, round(valid_loss, 4)))
 
         # save results
-        with open(f'{config["regression"]["result_path"]}result.txt',
+        with open(f'{config["regression"]["save_path"]}result.txt',
                   'a', encoding='utf-8') as fo:
             fo.write("\nEPOCH {0} | Train loss: {1}\nEPOCH {0} | Validtation loss: {2}\nEPOCH {0} | Current learning rate: {3}".format(
                 epoch, round(train_loss, 4), round(valid_loss, 4), optimizer.state_dict()['param_groups'][0]['lr']))
@@ -289,7 +289,7 @@ def test_regression(test_loader, model, regre_loss_func, trans_model_w2v, trans_
           % (bi_acc, f1, mae, corr))
 
     # save result
-    with open(os.path.join(config["regression"]["result_path"], 'result.txt'),
+    with open(os.path.join(config["regression"]["save_path"], 'result.txt'),
               'a', encoding='utf-8') as fo:
         fo.write("\nTest loss: %s\nTest set accuracy is %s\nTest set f1 score is %s\n"
                  "Test set MAE is %s\nTest set Corr is %s\n"
@@ -311,8 +311,8 @@ if __name__ == '__main__':
         # check the output path
         if not os.path.exists(config["translation"]["save_path"]):
             os.mkdir(config["translation"]["save_path"])
-        if not os.path.exists(config["translation"]["result_path"]):
-            os.mkdir(config["translation"]["result_path"])
+        if not os.path.exists(config["translation"]["save_path"]):
+            os.mkdir(config["translation"]["save_path"])
 
         # create translation model
         print("Creating translation model ...")
@@ -334,7 +334,7 @@ if __name__ == '__main__':
         scheduler_w2a = ReduceLROnPlateau(translation_optimizer_w2a, mode='min', patience=5, factor=0.1, verbose=True)
 
         # save config file
-        with open('{}/config.yaml'.format(config["translation"]["result_path"]), 'w') as f:
+        with open('{}/config.yaml'.format(config["translation"]["save_path"]), 'w') as f:
             yaml.dump(config, f)
 
         # train translation model
@@ -348,11 +348,11 @@ if __name__ == '__main__':
         # check the output path
         if not os.path.exists(config["regression"]["save_path"]):
             os.mkdir(config["regression"]["save_path"])
-        if not os.path.exists(config["regression"]["result_path"]):
-            os.mkdir(config["regression"]["result_path"])
+        if not os.path.exists(config["regression"]["save_path"]):
+            os.mkdir(config["regression"]["save_path"])
 
         # save config file
-        with open('{}/config.yaml'.format(config["regression"]["result_path"]), 'w') as f:
+        with open('{}/config.yaml'.format(config["regression"]["save_path"]), 'w') as f:
             yaml.dump(config, f)
 
         # create regression model

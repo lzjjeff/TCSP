@@ -15,8 +15,7 @@ def get_argparse():
     general_group.add_argument("--device_ids", type=int, nargs='+', default=0)
 
     regre_group = parser.add_argument_group(title="regression")
-    regre_group.add_argument("--regre_save_path", type=str, default="./save/regre/")
-    regre_group.add_argument("--regre_result_path", type=str, default="./save/regre/")
+    regre_group.add_argument("--regre_save_path", type=str, default="./save/ccn/regre/")
     regre_group.add_argument("--regre_epoch", type=int, default=20)
     regre_group.add_argument("--regre_lr", type=float, default=1e-4)
     regre_group.add_argument("--regre_weight_decay", type=float, default=0.0)
@@ -32,8 +31,7 @@ def get_argparse():
     regre_group.add_argument("--regre_dropout", type=float, default=0.5)
 
     trans_group = parser.add_argument_group(title="translation")
-    trans_group.add_argument("--trans_save_path", type=str, default="./save/trans/")
-    trans_group.add_argument("--trans_result_path", type=str, default="./save/trans/")
+    trans_group.add_argument("--trans_save_path", type=str, default="./save/ccn/trans/")
     trans_group.add_argument("--trans_epoch", type=int, default=20)
     trans_group.add_argument("--trans_lr", type=float, default=1e-3)
     trans_group.add_argument("--trans_weight_decay", type=float, default=0.0)
@@ -63,11 +61,8 @@ def get_config_from_args(args):
 
     # regression config
     config["regression"]["save_path"] = args.regre_save_path
-    config["regression"]["result_path"] = args.regre_result_path
     if not config["regression"]["save_path"].endswith('/'):
         config["regression"]["save_path"] += '/'
-    if not config["regression"]["result_path"].endswith('/'):
-        config["regression"]["result_path"] += '/'
 
     config["regression"]["max_len"] = args.max_len
     config["regression"]["w_size"] = 300
@@ -92,11 +87,8 @@ def get_config_from_args(args):
 
     # translation config
     config["translation"]["save_path"] = args.trans_save_path
-    config["translation"]["result_path"] = args.trans_result_path
     if not config["translation"]["save_path"].endswith('/'):
         config["translation"]["save_path"] += '/'
-    if not config["translation"]["result_path"].endswith('/'):
-        config["translation"]["result_path"] += '/'
 
     config["translation"]["epoch"] = args.trans_epoch
     config["translation"]["max_len"] = args.max_len
