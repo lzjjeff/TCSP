@@ -146,3 +146,7 @@ TCSP performance on MOSI & MOSEI test set. The evaluation metrics are:
 | MOSI  | 80.9 | 81.0 | 0.908 | 0.710 |
 | MOSEI | 82.8 | 82.6 | 0.576 | 0.715 |
 
+
+
+## Citation
+
