@@ -15,8 +15,8 @@ def get_argparse():
     general_group.add_argument("--device_ids", type=int, nargs='+', default=0)
 
     regre_group = parser.add_argument_group(title="regression")
-    regre_group.add_argument("--regre_save_path", type=str, default="./save/ccn/regre/")
-    regre_group.add_argument("--regre_result_path", type=str, default="./result/ccn/regre/")
+    regre_group.add_argument("--regre_save_path", type=str, default="./save/regre/")
+    regre_group.add_argument("--regre_result_path", type=str, default="./save/regre/")
     regre_group.add_argument("--regre_epoch", type=int, default=20)
     regre_group.add_argument("--regre_lr", type=float, default=1e-4)
     regre_group.add_argument("--regre_weight_decay", type=float, default=0.0)
@@ -32,8 +32,8 @@ def get_argparse():
     regre_group.add_argument("--regre_dropout", type=float, default=0.5)
 
     trans_group = parser.add_argument_group(title="translation")
-    trans_group.add_argument("--trans_save_path", type=str, default="./save/ccn/trans/")
-    trans_group.add_argument("--trans_result_path", type=str, default="./result/ccn/trans/")
+    trans_group.add_argument("--trans_save_path", type=str, default="./save/trans/")
+    trans_group.add_argument("--trans_result_path", type=str, default="./save/trans/")
     trans_group.add_argument("--trans_epoch", type=int, default=20)
     trans_group.add_argument("--trans_lr", type=float, default=1e-3)
     trans_group.add_argument("--trans_weight_decay", type=float, default=0.0)
