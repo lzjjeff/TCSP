@@ -37,7 +37,7 @@ class Translation(nn.Module):
         return torch.softmax(attn_scores, dim=1)    # (1, enc_n, b)
 
     def encode(self, source, lengths):
-        packed_sequence = pack_padded_sequence(source, lengths)
+        packed_sequence = pack_padded_sequence(source, lengths.cpu())
         packed_hs, (final_h, _) = self.encoder(packed_sequence)
         enc_hs, _ = pad_packed_sequence(packed_hs)  # (enc_n, b, enc_h_d)
         return enc_hs
@@ -198,7 +198,7 @@ class Regression(nn.Module):
         self.dropout = nn.Dropout(0.5)
 
     def encode(self, sequence, lengths, encoder):
-        packed_sequence = pack_padded_sequence(sequence, lengths, batch_first=True)
+        packed_sequence = pack_padded_sequence(sequence, lengths.cpu(), batch_first=True)
         packed_hs, (final_h, _) = encoder(packed_sequence)
         enc_hs, lens = pad_packed_sequence(packed_hs, batch_first=True)
 

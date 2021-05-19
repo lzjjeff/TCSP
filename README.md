@@ -8,10 +8,9 @@ Code for ACL 2021 Findings paper: *[A Text-Centered Shared-Private Framework via
 
 ## Dependencies
 
-* Python 3.7.1
-* PyTorch 1.7.1
+* Python 3.6.8
+* PyTorch 1.3.1
 * Numpy 1.19.2
-* Scikit-Learn 0.24.1
 * CUDA 10.1
 
 
@@ -61,13 +60,14 @@ We use a pipeline approach to train the translation model and the regression mod
 Take MOSEI as an example, you can train and test the two model at once via:
 
 ```bash
+export DATASET=mosei
 python run_tcsp.py \
---dataset mosei \
+--dataset ${DATASET} \
 --batch_size 24 \
 --do_trans \
 --do_regre \
---trans_save_path ./save/mosei/trans/ \
---regre_save_path ./save/mosei/regre/ \
+--trans_save_path ./save/${DATASET}/trans/ \
+--regre_save_path ./save/${DATASET}/regre/ \
 --device_ids 0 \
 --trans_epoch 40 \
 --trans_hidden_size 100 \
@@ -89,11 +89,12 @@ The trained models and test results are saved in `trans_save_path` and `regre_sa
 If you want to train the two models separately, you can first train the translation model via:
 
 ```bash
+export DATASET=mosei
 python run_tcsp.py \
---dataset mosei \
+--dataset ${DATASET} \
 --batch_size 24 \
 --do_trans \
---trans_save_path ./save/mosei/trans/ \
+--trans_save_path ./save/${DATASET}/trans/ \
 --device_ids 0 \
 --trans_epoch 40 \
 --trans_hidden_size 100 \
@@ -103,12 +104,13 @@ python run_tcsp.py \
 After above step finished, train and test the regression model via:
 
 ```bash
+export DATASET=mosei
 python run_tcsp.py \
---dataset mosei \
+--dataset ${DATASET} \
 --batch_size 24 \
 --do_regre \
---trans_save_path ./save/mosei/trans/ \	 # for reading the trained translation model
---regre_save_path ./save/mosei/regre/ \
+--trans_save_path ./save/${DATASET}/trans/ \	 # for reading the trained translation model
+--regre_save_path ./save/${DATASET}/regre/ \
 --device_ids 0 \
 --regre_epoch 30 \
 --regre_lr 1e-3 \

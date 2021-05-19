@@ -30,7 +30,7 @@ def train_translation(tr_loader, val_loader, model, optimizer, scheduler, loss_f
     val_losses = []
     best_val_loss = float('inf')
     last_lr = float('inf')
-    for epoch in tqdm(range(config["translation"]["epoch"]), desc="Training the translation model ..."):
+    for epoch in tqdm(range(config["translation"]["epoch"]), desc="Training the %s translation model ..." % predix):
         lrs = []
         model.train()
         tr_loss = 0.0
@@ -81,18 +81,18 @@ def train_translation(tr_loader, val_loader, model, optimizer, scheduler, loss_f
                      (epoch, round(tr_loss, 4), epoch, round(val_loss, 4), epoch, optimizer.state_dict()['param_groups'][0]['lr']))
 
         # save checkpoint
-        checkpoint_path = os.path.join(config["translation"]["save_path"], 'checkpoints-epoch%d' % epoch)
-        if not os.path.exists(checkpoint_path):
-            os.mkdir(checkpoint_path)
-        if device == "cpu":
-            torch.save(model.state_dict(),
-                       os.path.join(checkpoint_path, f'translation_model_{predix}.std'))
-        else:
-            # torch.save(model.module.get_attn_parameters(), f'{checkpoint_path}attn_params_{predix}.std')
-            torch.save(model.module.state_dict(),
-                       os.path.join(checkpoint_path, f'translation_model_{predix}.std'))
-        torch.save(optimizer.state_dict(),
-                   os.path.join(checkpoint_path, f'translation_optim_{predix}.std'))
+        # checkpoint_path = os.path.join(config["translation"]["save_path"], 'checkpoints-epoch%d' % epoch)
+        # if not os.path.exists(checkpoint_path):
+        #     os.mkdir(checkpoint_path)
+        # if device == "cpu":
+        #     torch.save(model.state_dict(),
+        #                os.path.join(checkpoint_path, f'translation_model_{predix}.std'))
+        # else:
+        #     # torch.save(model.module.get_attn_parameters(), f'{checkpoint_path}attn_params_{predix}.std')
+        #     torch.save(model.module.state_dict(),
+        #                os.path.join(checkpoint_path, f'translation_model_{predix}.std'))
+        # torch.save(optimizer.state_dict(),
+        #            os.path.join(checkpoint_path, f'translation_optim_{predix}.std'))
 
         if val_loss <= best_val_loss:
             best_val_loss = val_loss
