@@ -45,7 +45,14 @@ mkdir mosi mosei && cd ../
 
 We evaluate our model on two benchmarks MOSI and MOSEI.
 
-The data for experiment are placed in `./data/`, you can download the processed MOSI and MOSEI datasets in *[GoogleDrive](https://drive.google.com/drive/folders/1L2yF8VQqT1spvagxeqYMt9l7J9U_va3B?usp=sharing, https://drive.google.com/drive/folders/1V2p3faHkizi68-icSfdOLe6TDE5A7nRh?usp=sharing)* / *[BaiduCloud]()* and place them to `./data/MOSI/` and`./data/MOSEI` .
+The data for experiment are placed in `./data/`, you can download the processed MOSI and MOSEI datasets from:
+
+| Dataset | Link1                                                        | Link2            |
+| ------- | ------------------------------------------------------------ | ---------------- |
+| MOSI    | *[GoogleDrive]( https://drive.google.com/drive/folders/1V2p3faHkizi68-icSfdOLe6TDE5A7nRh?usp=sharing)* | *[BaiduCloud]()* |
+| MOSEI   | *[GoogleDrive](https://drive.google.com/drive/folders/1L2yF8VQqT1spvagxeqYMt9l7J9U_va3B?usp=sharing)* | *[BaiduCloud]()* |
+
+and place them to `./data/MOSI/` and`./data/MOSEI` .
 
 For more specific introduction about the two datasets, please refer to *[CMU-MultimodalSDK](https://github.com/A2Zadeh/CMU-MultimodalSDK)*.
 
