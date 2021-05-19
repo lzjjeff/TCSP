@@ -398,7 +398,7 @@ if __name__ == '__main__':
             p.requires_grad = False
 
         # train regressoin model
-        print("训练回归模型...")
+        print("Training regression model ...")
         train_regression(train_loader, valid_loader, regression_model, regression_optimizer, scheduler,
                         regresson_loss_func, translation_model_w2v, translation_model_w2a, trans_loss_func)
 
