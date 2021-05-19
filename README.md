@@ -12,7 +12,7 @@ Code for ACL 2021 Findings paper: *[A Text-Centered Shared-Private Framework via
 * PyTorch 1.7.1
 * Numpy 1.19.2
 * Scikit-Learn 0.24.1
-* CUDA 10.2
+* CUDA 10.1
 
 
 
@@ -121,6 +121,8 @@ python run_tcsp.py \
 --trans_hidden_size 100 \	# required to match the translation setting
 ```
 
+You can find more details about hyper-parameters in `util.py`.
+
 
 
 ## Results on MOSI & MOSEI
@@ -134,3 +136,4 @@ TCSP performance on MOSI & MOSEI test set. The evaluation metrics are:
 | :---: | :--: | :--: | :---: | :---: |
 | MOSI  | 80.9 | 81.0 | 0.908 | 0.710 |
 | MOSEI | 82.8 | 82.6 | 0.576 | 0.715 |
+
