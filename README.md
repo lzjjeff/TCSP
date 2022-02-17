@@ -1,6 +1,6 @@
 # TCSP
 
-Code for ACL 2021 Findings paper: *[A Text-Centered Shared-Private Framework via Cross-Modal Prediction for Multimodal Sentiment Analysis]()*
+Code for Findings of ACL 2021 paper: *[A Text-Centered Shared-Private Framework via Cross-Modal Prediction for Multimodal Sentiment Analysis]()*
 
 ![model](./img/TCSP.jpg)
 
@@ -47,10 +47,10 @@ We evaluate our model on two benchmarks MOSI and MOSEI.
 
 The data for experiment are placed in `./data/`, you can download the processed MOSI and MOSEI datasets from:
 
-| Dataset | Link1                                                        | Link2            |
-| ------- | ------------------------------------------------------------ | ---------------- |
-| MOSI    | *[GoogleDrive]( https://drive.google.com/drive/folders/1V2p3faHkizi68-icSfdOLe6TDE5A7nRh?usp=sharing)* | *[BaiduCloud]()* |
-| MOSEI   | *[GoogleDrive](https://drive.google.com/drive/folders/1L2yF8VQqT1spvagxeqYMt9l7J9U_va3B?usp=sharing)* | *[BaiduCloud]()* |
+| Dataset | Link1                                                        |
+| ------- | ------------------------------------------------------------ |
+| MOSI    | *[GoogleDrive](https://drive.google.com/file/d/15hQVBJ0MJZVDU8MA_smyccgAVXedMABL/view?usp=sharing)* |
+| MOSEI   | *[GoogleDrive](https://drive.google.com/file/d/1b17EAnEwTwsrEwqrR6Nj6goz54mXB4_1/view?usp=sharing)* |
 
 and place them to `./data/MOSI/` and`./data/MOSEI` .
 
