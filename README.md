@@ -1,6 +1,6 @@
 # TCSP
 
-Code for Findings of ACL 2021 paper: *[A Text-Centered Shared-Private Framework via Cross-Modal Prediction for Multimodal Sentiment Analysis]()*
+Code for Findings of ACL 2021 paper: *[A Text-Centered Shared-Private Framework via Cross-Modal Prediction for Multimodal Sentiment Analysis](https://aclanthology.org/2021.findings-acl.417/)*
 
 ![model](./img/TCSP.jpg)
 
