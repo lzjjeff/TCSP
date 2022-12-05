@@ -149,4 +149,19 @@ TCSP performance on MOSI & MOSEI test set. The evaluation metrics are:
 
 
 ## Citation
-
+```text
+@inproceedings{wu-etal-2021-text,
+    title = "A Text-Centered Shared-Private Framework via Cross-Modal Prediction for Multimodal Sentiment Analysis",
+    author = "Wu, Yang  and
+      Lin, Zijie  and
+      Zhao, Yanyan  and
+      Qin, Bing  and
+      Zhu, Li-Nan",
+    booktitle = "Findings of the Association for Computational Linguistics: ACL-IJCNLP 2021",
+    year = "2021",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2021.findings-acl.417",
+    doi = "10.18653/v1/2021.findings-acl.417",
+    pages = "4730--4738",
+}
+```
